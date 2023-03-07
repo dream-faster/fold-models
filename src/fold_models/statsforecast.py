@@ -40,4 +40,8 @@ class UnivariateStatsForecast(Model):
     #         raise ValueError("Unknown prediction dictionary structure")
 
     def predict(self, X: pd.DataFrame) -> pd.DataFrame:
-        return pd.Series(self.model.predict(h=len(X))["mean"], index=X.index)
+        return pd.Series(
+            self.model.predict(h=len(X))["mean"],
+            index=X.index,
+            name=self.name + "_predictions",
+        )

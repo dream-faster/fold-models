@@ -40,4 +40,6 @@ class XGB(Model):
             self.fitted = True
 
     def predict(self, X: pd.DataFrame) -> pd.DataFrame:
-        return pd.Series(self.model.predict(X), index=X.index)
+        return pd.Series(
+            self.model.predict(X), index=X.index, name=self.name + "_predictions"
+        )
