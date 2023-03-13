@@ -19,7 +19,7 @@ def test_statsforecast_univariate_naive() -> None:
     transformations_over_time = train(transformations, X, y, splitter)
     pred = backtest(transformations_over_time, X, y, splitter)
     assert np.isclose(
-        y.squeeze().shift(1)[pred.index][:-1], pred.squeeze().values[:-1], atol=0.01
+        y.squeeze().shift(1)[pred.index][:-1], pred.squeeze()[:-1], atol=0.01
     ).all()
 
 
@@ -28,7 +28,7 @@ def run_pipeline_and_check_if_results_are_close(model, splitter: Splitter):
 
     transformations_over_time = train(model, X, y, splitter)
     pred = backtest(transformations_over_time, X, y, splitter)
-    assert np.isclose(y.squeeze()[pred.index], pred.squeeze().values, atol=0.1).all()
+    assert np.isclose(y.squeeze()[pred.index], pred.squeeze(), atol=0.1).all()
 
 
 def test_statsforecast_univariate_autoarima() -> None:
