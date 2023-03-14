@@ -4,9 +4,10 @@ from typing import Any, Optional, Type, Union
 
 import pandas as pd
 from fold.models.base import Model
+from sktime.forecasting.base import ForecastingHorizon
 
 
-class WrapStatsForecast(Model):
+class WrapSktime(Model):
     properties = Model.Properties(
         model_type=Model.Properties.ModelType.regressor,
     )
@@ -37,7 +38,7 @@ class WrapStatsForecast(Model):
         model,
         use_exogenous: bool,
         online_mode: bool = False,
-    ) -> WrapStatsForecast:
+    ) -> WrapSktime:
         return cls(
             model_class=None,
             init_args=None,
@@ -50,33 +51,30 @@ class WrapStatsForecast(Model):
         self, X: pd.DataFrame, y: pd.Series, sample_weights: Optional[pd.Series] = None
     ) -> None:
         if self.use_exogenous:
-            self.model.fit(y=y.values, X=X.values)
+            self.model.fit(y=y, X=X)
         else:
-            self.model.fit(y=y.values)
+            self.model.fit(y=y)
 
     def update(
         self, X: pd.DataFrame, y: pd.Series, sample_weights: Optional[pd.Series] = None
     ) -> None:
-        if not hasattr(self.model, "forward"):
+        if not hasattr(self.model, "update"):
             return
         if self.use_exogenous:
-            self.model.forward(y=y.values, h=len(X), X=X.values)
+            self.model.update(y=y, X=X, update_params=True)
         else:
-            self.model.forward(y=y.values, h=len(X))
+            self.model.update(y=y, update_params=True)
 
     def predict(self, X: pd.DataFrame) -> Union[pd.Series, pd.DataFrame]:
+        fh = ForecastingHorizon(X.index, is_relative=False)
         if self.use_exogenous:
-            return pd.Series(
-                self.model.predict(h=len(X), X=X.values)["mean"], index=X.index
-            )
+            return pd.Series(self.model.predict(fh, X=X), index=X.index)
         else:
-            return pd.Series(self.model.predict(h=len(X))["mean"], index=X.index)
+            return pd.Series(self.model.predict(fh), index=X.index)
 
     def predict_in_sample(self, X: pd.DataFrame) -> Union[pd.Series, pd.DataFrame]:
-        pred_dict = self.model.predict_in_sample()
-        if "fitted" in pred_dict:
-            return pd.Series(pred_dict["fitted"], index=X.index)
-        elif "mean" in pred_dict:
-            return pd.Series(pred_dict["mean"], index=X.index)
-        else:
-            raise ValueError("Unknown prediction dictionary structure")
+        fh = ForecastingHorizon(X.index, is_relative=False)
+
+        pred_dict = self.model.predict(fh)
+
+        return pred_dict
