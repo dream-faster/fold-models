@@ -24,8 +24,9 @@ classifiers = [
 dependencies = [
   "numpy",
   "fold @ https://github.com/dream-faster/fold/archive/main.zip",
+  "scikit-learn",
 ]
-description = "Model wrappers for fold."
+description = "Models for fold."
 keywords = []
 license = { file="LICENSE" }
 readme = "README.md"
@@ -54,29 +55,6 @@ docs = [
   "mkdocs-autorefs"
 ]
 
-sktime = [
-  "sktime>=0.16.0",
-  "pmdarima>=2.0.0"
-]
-statsforecast = [
-  "statsforecast>=1.5"
-]
-statsmodels = [
-  "statsmodels>=0.12.0"
-]
-xgboost = [
-  "xgboost"
-]
-prophet = [
-  "prophet"
-]
-neuralforecast = [
-  "neuralforecast>=1.4",
-  "torch<2.0.0",
-]
-lightgbm = [
-  "lightgbm"
-]
 
 [tool.hatch.envs.quality]
 dependencies = [

@@ -23,7 +23,7 @@
 
 # Available models
 
-| Name                                   |                          Link                          | Supports<br />Online <br />updating | Wrapper Name<br />& Import Location                                            |
+| Name                                   |                          Link                          | Supports<br />Online <br />updating | Usage                                            |
 | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:| :------------------------------------- | :----------------------------------------------------: | :---------------------------------: | ------------------------------------------------------------------------------ |
 | Sklearn <br/>(natively available in `fold`) | [GitHub](https://github.com/scikit-learn/scikit-learn) |             🟡<br/>(some)              | Sklearn doesn't need to be wrapped,<br />just pass in the models.              |
 
