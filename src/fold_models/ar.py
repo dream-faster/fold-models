@@ -2,23 +2,23 @@ from typing import Optional, Union
 
 import numpy as np
 import pandas as pd
-from fold.models.base import Model
-from pytest import param
+from fold.models.base import TimeSeriesModel
 from sklearn.linear_model import LinearRegression, SGDRegressor
 
 
-class AR(Model):
+class AR(TimeSeriesModel):
     def __init__(self, p: int) -> None:
         self.p = p
         self.name = f"AR-{str(p)}"
-        self.properties = Model.Properties(
+        self.properties = TimeSeriesModel.Properties(
             requires_X=False,
-            mode=Model.Properties.Mode.online,
-            model_type=Model.Properties.ModelType.regressor,
+            mode=TimeSeriesModel.Properties.Mode.online,
+            model_type=TimeSeriesModel.Properties.ModelType.regressor,
             memory_size=p,
             _internal_supports_minibatch_backtesting=False,
         )
-        self.models = [LinearRegression() for _ in range(p)]
+        # self.models = [LinearRegression() for _ in range(p)]
+        self.models = [SGDRegressor() for _ in range(p)]
 
     def fit(
         self,
@@ -27,6 +27,21 @@ class AR(Model):
         sample_weights: Optional[pd.Series] = None,
     ) -> None:
         # Using Least Squares as it's faster than SGD for the initial fit
+        # for index, model in enumerate(self.models, start=1):
+        #     model.fit(
+        #         y.shift(index).to_frame()[index:],
+        #         y[index:],
+        #         sample_weight=sample_weights[-index:]
+        #         if sample_weights is not None
+        #         else None,
+        #     )
+        # self.parameters = [
+        #     {
+        #         "coef_": model.coef_[0],
+        #         "intercept_": model.intercept_,
+        #     }
+        #     for model in self.models
+        # ]
         for index, model in enumerate(self.models, start=1):
             model.fit(
                 y.shift(index).to_frame()[index:],
@@ -35,13 +50,6 @@ class AR(Model):
                 if sample_weights is not None
                 else None,
             )
-        self.parameters = [
-            {
-                "coef_": model.coef_[0],
-                "intercept_": model.intercept_,
-            }
-            for model in self.models
-        ]
 
     def update(
         self,
@@ -65,7 +73,7 @@ class AR(Model):
                 )
         else:
             for index, model in enumerate(self.models, start=1):
-                model.fit(
+                model.partial_fit(
                     y.shift(index).to_frame()[-index:],
                     y[-index:],
                     sample_weight=sample_weights[-index:]
@@ -73,27 +81,28 @@ class AR(Model):
                     else None,
                 )
 
-    def predict(self, X: pd.DataFrame) -> Union[pd.Series, pd.DataFrame]:
-        return predict(
-            self.models, self._state.memory_y, in_sample=False, index=X.index
-        )
+    def predict_in_sample(
+        self, X: pd.DataFrame, y: pd.Series
+    ) -> Union[pd.Series, pd.DataFrame]:
+        return predict(self.models, y.shift(1), indices=X.index)
 
-    def predict_in_sample(self, X: pd.DataFrame) -> Union[pd.Series, pd.DataFrame]:
-        return predict(self.models, self._state.memory_y, in_sample=True, index=X.index)
+    def predict(
+        self, X: pd.DataFrame, past_y: pd.Series
+    ) -> Union[pd.Series, pd.DataFrame]:
+        return predict(self.models, past_y, indices=X.index)
 
 
-def predict(models, memory_y: pd.Series, in_sample: bool, index) -> pd.Series:
+def predict(models, memory_y: pd.Series, indices) -> pd.Series:
+    if len(memory_y) == 1:
+        return pd.Series(models[0].predict(memory_y.to_frame()), index=indices.iloc[-1])
+
     preds = [
         np.concatenate(
             [
-                np.empty((index,)),
-                lr.predict(
-                    memory_y.shift(
-                        index if in_sample is True else index - 1
-                    ).to_frame()[index:]
-                ),
+                np.zeros((index,)),
+                lr.predict(memory_y.shift(index - 1).to_frame()[index:]),
             ]
         )
         for index, lr in enumerate(models, start=1)
     ]
-    return pd.Series(np.vstack(preds).sum(axis=0), index=index)
+    return pd.Series(np.vstack(preds).sum(axis=0), index=indices)

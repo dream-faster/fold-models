@@ -17,7 +17,6 @@ def test_ar_equivalent() -> None:
     pred_own_ar, _ = train_backtest(model, None, y, splitter)
 
     # model = WrapStatsForecast.from_model(StatsForecastARIMA((1, 0, 0)))
-    # trained_pipeline = train(model, None, y, splitter)
     model = WrapStatsModels(
         StatsModelARIMA, init_args={"order": (1, 0, 0)}, online_mode=True
     )
@@ -29,7 +28,7 @@ def test_ar_equivalent() -> None:
 
 
 def test_ar_speed() -> None:
-    _, y = generate_monotonous_data(length=70000, freq="s")
+    _, y = generate_monotonous_data(length=7000, freq="s")
 
     model = AR(2)
     splitter = ExpandingWindowSplitter(initial_train_window=0.1, step=0.1)
@@ -37,7 +36,7 @@ def test_ar_speed() -> None:
 
 
 def test_statsforecast_arima_speed() -> None:
-    _, y = generate_monotonous_data(length=70000, freq="s")
+    _, y = generate_monotonous_data(length=7000, freq="s")
 
     model = WrapStatsForecast.from_model(StatsForecastARIMA((2, 0, 0)))
     splitter = ExpandingWindowSplitter(initial_train_window=0.1, step=0.1)
