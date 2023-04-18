@@ -46,7 +46,7 @@ class AR(TimeSeriesModel):
             model.fit(
                 y.shift(index).to_frame()[index:],
                 y[index:],
-                sample_weight=sample_weights[-index:]
+                sample_weight=sample_weights[index:]
                 if sample_weights is not None
                 else None,
             )
@@ -74,17 +74,17 @@ class AR(TimeSeriesModel):
         else:
             for index, model in enumerate(self.models, start=1):
                 model.partial_fit(
-                    y.shift(index).to_frame()[-index:],
-                    y[-index:],
-                    sample_weight=sample_weights[-index:]
+                    y.shift(index).to_frame()[index:],
+                    y[index:],
+                    sample_weight=sample_weights[index:]
                     if sample_weights is not None
                     else None,
                 )
 
     def predict_in_sample(
-        self, X: pd.DataFrame, y: pd.Series
+        self, X: pd.DataFrame, lagged_y: pd.Series
     ) -> Union[pd.Series, pd.DataFrame]:
-        return predict(self.models, y.shift(1), indices=X.index)
+        return predict(self.models, lagged_y, indices=X.index)
 
     def predict(
         self, X: pd.DataFrame, past_y: pd.Series
@@ -92,15 +92,12 @@ class AR(TimeSeriesModel):
         return predict(self.models, past_y, indices=X.index)
 
 
-def predict(models, memory_y: pd.Series, indices) -> pd.Series:
-    if len(memory_y) == 1:
-        return pd.Series(models[0].predict(memory_y.to_frame()), index=indices.iloc[-1])
-
+def predict(models, past_y: pd.Series, indices) -> pd.Series:
     preds = [
         np.concatenate(
             [
                 np.zeros((index,)),
-                lr.predict(memory_y.shift(index - 1).to_frame()[index:]),
+                lr.predict(past_y.shift(index - 1).to_frame()[index:]),
             ]
         )
         for index, lr in enumerate(models, start=1)

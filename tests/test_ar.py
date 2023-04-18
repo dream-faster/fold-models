@@ -16,7 +16,7 @@ def test_ar_equivalent() -> None:
     splitter = ExpandingWindowSplitter(initial_train_window=40, step=1)
     pred_own_ar, _ = train_backtest(model, None, y, splitter)
 
-    # model = WrapStatsForecast.from_model(StatsForecastARIMA((1, 0, 0)))
+    model = WrapStatsForecast.from_model(StatsForecastARIMA((1, 0, 0)))
     model = WrapStatsModels(
         StatsModelARIMA, init_args={"order": (1, 0, 0)}, online_mode=True
     )
