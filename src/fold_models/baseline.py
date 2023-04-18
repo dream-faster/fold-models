@@ -1,39 +1,12 @@
-from __future__ import annotations
-
 from typing import Union
 
 import pandas as pd
 from fold.base import fit_noop
-from fold.models.base import Model
+from fold.models.base import TimeSeriesModel
+from fold.models.baseline import Naive  # noqa
 
 
-class Naive(Model):
-    """
-    A model that predicts the last value seen.
-    """
-
-    name = "Naive"
-    properties = Model.Properties(
-        requires_X=False,
-        mode=Model.Properties.Mode.online,
-        memory_size=1,
-        _internal_supports_minibatch_backtesting=True,
-    )
-
-    def predict(self, X: pd.DataFrame) -> Union[pd.Series, pd.DataFrame]:
-        # it's an online transformation, so len(X) will be always 1,
-        return pd.Series(
-            self._state.memory_y.iloc[-1].squeeze(), index=X.index[-1:None]
-        )
-
-    def predict_in_sample(self, X: pd.DataFrame) -> Union[pd.Series, pd.DataFrame]:
-        return self._state.memory_y.shift(1)
-
-    fit = fit_noop
-    update = fit
-
-
-class NaiveSeasonal(Model):
+class NaiveSeasonal(TimeSeriesModel):
     """
     A model that predicts the last value seen in the same season.
     """
@@ -43,28 +16,32 @@ class NaiveSeasonal(Model):
     def __init__(self, seasonal_length: int) -> None:
         assert seasonal_length > 1, "seasonal_length must be greater than 1"
         self.seasonal_length = seasonal_length
-        self.properties = Model.Properties(
+        self.properties = TimeSeriesModel.Properties(
             requires_X=False,
-            mode=Model.Properties.Mode.online,
+            mode=TimeSeriesModel.Properties.Mode.online,
             memory_size=seasonal_length,
             _internal_supports_minibatch_backtesting=True,
         )
 
-    def predict(self, X: pd.DataFrame) -> Union[pd.Series, pd.DataFrame]:
+    def predict(
+        self, X: pd.DataFrame, past_y: pd.Series
+    ) -> Union[pd.Series, pd.DataFrame]:
         # it's an online transformation, so len(X) will be always 1,
         return pd.Series(
-            self._state.memory_y.iloc[-self.seasonal_length].squeeze(),
+            past_y.iloc[-self.seasonal_length].squeeze(),
             index=X.index[-1:None],
         )
 
-    def predict_in_sample(self, X: pd.DataFrame) -> Union[pd.Series, pd.DataFrame]:
-        return self._state.memory_y.shift(self.seasonal_length)
+    def predict_in_sample(
+        self, X: pd.DataFrame, lagged_y: pd.Series
+    ) -> Union[pd.Series, pd.DataFrame]:
+        return lagged_y.shift(self.seasonal_length - 1)
 
     fit = fit_noop
     update = fit
 
 
-class MovingAverage(Model):
+class MovingAverage(TimeSeriesModel):
     """
     A model that predicts the mean of the last values seen.
     """
@@ -73,21 +50,23 @@ class MovingAverage(Model):
 
     def __init__(self, window_size: int) -> None:
         self.window_size = window_size
-        self.properties = Model.Properties(
+        self.properties = TimeSeriesModel.Properties(
             requires_X=False,
-            mode=Model.Properties.Mode.online,
+            mode=TimeSeriesModel.Properties.Mode.online,
             memory_size=window_size,
             _internal_supports_minibatch_backtesting=True,
         )
 
-    def predict(self, X: pd.DataFrame) -> Union[pd.Series, pd.DataFrame]:
+    def predict(
+        self, X: pd.DataFrame, past_y: pd.Series
+    ) -> Union[pd.Series, pd.DataFrame]:
         # it's an online transformation, so len(X) will be always 1,
-        return pd.Series(
-            self._state.memory_y[-self.window_size :].mean(), index=X.index[-1:None]
-        )
+        return pd.Series(past_y[-self.window_size :].mean(), index=X.index[-1:None])
 
-    def predict_in_sample(self, X: pd.DataFrame) -> Union[pd.Series, pd.DataFrame]:
-        return self._state.memory_y.shift(1).rolling(self.window_size).mean()
+    def predict_in_sample(
+        self, X: pd.DataFrame, lagged_y: pd.Series
+    ) -> Union[pd.Series, pd.DataFrame]:
+        return lagged_y.rolling(self.window_size).mean()
 
     fit = fit_noop
     update = fit

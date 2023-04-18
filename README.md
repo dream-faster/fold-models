@@ -23,9 +23,11 @@
 
 # Available models
 
-| Name                                   |                          Link                          | Supports<br />Online <br />updating | Usage                                            |
-| :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:| :------------------------------------- | :----------------------------------------------------: | :---------------------------------: | ------------------------------------------------------------------------------ |
-| Sklearn <br/>(natively available in `fold`) | [GitHub](https://github.com/scikit-learn/scikit-learn) |             🟡<br/>(some)              | Sklearn doesn't need to be wrapped,<br />just pass in the models.              |
+Name          | Usage
+--------------|----------------------------------------
+Naive         | `from fold_models import Naive`
+NaiveSeasonal | `from fold_models import NaiveSeasonal`
+MovingAverage | `from fold_models import MovingAverage`
 
 # Installation
 
