@@ -3,7 +3,7 @@ from typing import Union
 import pandas as pd
 from fold.base import fit_noop
 from fold.models.base import TimeSeriesModel
-from fold.models.baseline import Naive
+from fold.models.baseline import Naive  # noqa
 
 
 class NaiveSeasonal(TimeSeriesModel):

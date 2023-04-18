@@ -1,7 +1,6 @@
 import numpy as np
 from fold.loop import train_backtest
 from fold.splitters import ExpandingWindowSplitter
-from fold.transformations.columns import OnlyPredictions
 from fold.transformations.dev import Test
 from fold.utils.tests import generate_sine_wave_data
 
