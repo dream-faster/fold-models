@@ -79,9 +79,14 @@ Join our [Discord](https://discord.gg/EKJQgfuBpE) for live discussion!
 Submit an issue or reach out to us on info at dream-faster.ai for any inquiries.
 
 
-## Licence & Usage
+## License & Usage
 
-Fold is our open-core Time Series engine. It is available under the MIT + Common Clause licence.
-We want to **bring much-needed transparency, speed and rigour** to the process of building Time Series ML models. We're building multiple products with and on top of it.
+Dream Faster is structured in an open-core structure.
 
-It will be always free for research useage, but we will be charging for deployment, and for extra features that are results of our own resource-intensive R&D. We're building a sustainable business, that supports the ecosystem long-term.
+We want to bring much-needed transparency, speed and rigour to the process of building Time Series ML pipelines. We're building multiple products with Fold and on top of it, but want to contribute to Time-Series Research by giving access to non-commercial use of the software, specifically for researchers.
+
+We are providing copyleft for non-commercial use, so that researchers have access to Fold. If you are a researcher and would like to get access to Dream Faster's non-source available tools, please contact us here.
+
+We are building a sustainable business, that can meanwhile support the ecosystem in the long-term.
+
+For the specific Licence of this software please check the LICENCE file found in the repository.
