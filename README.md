@@ -33,13 +33,13 @@ MovingAverage | `from fold_models import MovingAverage`
 
 - Prerequisites: `python >= 3.7` and `pip`
 
-- Install from git directly:
+- Install from pypi:
   ```
-  pip install https://github.com/dream-faster/fold-models/archive/main.zip
+  pip install fold-models
   ```
 - Depending on what model you'd like to wrap, you can either install the library directly or run
    ```
-  pip install "git+https://github.com/dream-faster/fold-models.git#egg=fold-models[<your_library_name>]"
+  pip install "fold-models[<your_library_name>]"
   ```
 
 # Quickstart
