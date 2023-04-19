@@ -46,7 +46,7 @@ quality = [
 ]
 tests = [
   "pytest~=7.1.2",
-  "fold @ https://github.com/dream-faster/fold/archive/main.zip",
+  "fold-core~=0.0.6",
 ]
 docs = [
   "mkdocs-material",
