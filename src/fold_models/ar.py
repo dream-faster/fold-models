@@ -15,33 +15,17 @@ class AR(TimeSeriesModel):
             mode=TimeSeriesModel.Properties.Mode.online,
             model_type=TimeSeriesModel.Properties.ModelType.regressor,
             memory_size=p,
-            _internal_supports_minibatch_backtesting=False,
+            _internal_supports_minibatch_backtesting=True,
         )
-        # self.models = [LinearRegression() for _ in range(p)]
-        self.models = [SGDRegressor() for _ in range(p)]
+        self.models = [LinearRegression() for _ in range(p)]
 
     def fit(
         self,
         X: pd.DataFrame,
-        y: Optional[pd.Series],
+        y: pd.Series,
         sample_weights: Optional[pd.Series] = None,
     ) -> None:
         # Using Least Squares as it's faster than SGD for the initial fit
-        # for index, model in enumerate(self.models, start=1):
-        #     model.fit(
-        #         y.shift(index).to_frame()[index:],
-        #         y[index:],
-        #         sample_weight=sample_weights[-index:]
-        #         if sample_weights is not None
-        #         else None,
-        #     )
-        # self.parameters = [
-        #     {
-        #         "coef_": model.coef_[0],
-        #         "intercept_": model.intercept_,
-        #     }
-        #     for model in self.models
-        # ]
         for index, model in enumerate(self.models, start=1):
             model.fit(
                 y.shift(index).to_frame()[index:],
@@ -50,28 +34,37 @@ class AR(TimeSeriesModel):
                 if sample_weights is not None
                 else None,
             )
+        self.parameters = [
+            {
+                "coef_": model.coef_[0],
+                "intercept_": model.intercept_,
+            }
+            for model in self.models
+        ]
 
     def update(
         self,
         X: pd.DataFrame,
-        y: Optional[pd.Series],
+        y: pd.Series,
         sample_weights: Optional[pd.Series] = None,
     ) -> None:
         if isinstance(self.models[0], LinearRegression):
+            # If the model is being updated for the first time, convert to SGDRegressor (with the parameters from the initial fit)
             self.models = [SGDRegressor(warm_start=True) for _ in range(self.p)]
             for index, (model, parameters) in enumerate(
                 zip(self.models, self.parameters), start=1
             ):
                 model.fit(
-                    y.shift(index).to_frame()[-index:],
-                    y[-index:],
+                    y.shift(index).to_frame()[index:],
+                    y[index:],
                     coef_init=parameters["coef_"],
                     intercept_init=parameters["intercept_"],
-                    sample_weight=sample_weights[-index:]
+                    sample_weight=sample_weights[index:]
                     if sample_weights is not None
                     else None,
                 )
         else:
+            # For any subsequent updates, just call partial_fit
             for index, model in enumerate(self.models, start=1):
                 model.partial_fit(
                     y.shift(index).to_frame()[index:],
@@ -81,18 +74,15 @@ class AR(TimeSeriesModel):
                     else None,
                 )
 
-    def predict_in_sample(
-        self, X: pd.DataFrame, lagged_y: pd.Series
-    ) -> Union[pd.Series, pd.DataFrame]:
-        return predict(self.models, lagged_y, indices=X.index)
-
     def predict(
         self, X: pd.DataFrame, past_y: pd.Series
     ) -> Union[pd.Series, pd.DataFrame]:
-        return predict(self.models, past_y, indices=X.index)
+        return _predict(self.models, past_y, indices=X.index)
+
+    predict_in_sample = predict
 
 
-def predict(models, past_y: pd.Series, indices) -> pd.Series:
+def _predict(models, past_y: pd.Series, indices) -> pd.Series:
     preds = [
         np.concatenate(
             [

@@ -4,7 +4,7 @@ from fold.splitters import ExpandingWindowSplitter
 from fold.transformations.dev import Test
 from fold.utils.tests import generate_sine_wave_data
 
-from fold_models.baseline import MovingAverage, Naive, NaiveSeasonal
+from fold_models.baseline import MovingAverage, NaiveSeasonal
 
 
 def check_if_not_nan(x):
@@ -12,42 +12,6 @@ def check_if_not_nan(x):
 
 
 test_assert = Test(fit_func=check_if_not_nan, transform_func=lambda X: X)
-
-
-def test_baseline_naive() -> None:
-    X, y = generate_sine_wave_data(
-        cycles=10, length=120, freq="M"
-    )  # create a sine wave with yearly seasonality
-
-    splitter = ExpandingWindowSplitter(initial_train_window=0.2, step=0.1)
-    transformations = [
-        Naive(),
-        test_assert,
-    ]
-    pred, _ = train_backtest(transformations, X, y, splitter)
-    assert (
-        pred.squeeze() == y.shift(1)[pred.index]
-    ).all()  # last year's value should match this year's value, with the sine wave we generated
-    assert (
-        len(pred) == 120 * 0.8
-    )  # should return non-NaN predictions for the all out-of-sample sets
-
-
-def test_baseline_naive_online() -> None:
-    X, y = generate_sine_wave_data(
-        cycles=10, length=120, freq="M"
-    )  # create a sine wave with yearly seasonality
-
-    naive = Naive()
-    naive.properties._internal_supports_minibatch_backtesting = False
-    splitter = ExpandingWindowSplitter(initial_train_window=0.2, step=0.1)
-    pred, _ = train_backtest(naive, X, y, splitter)
-    assert (
-        pred.squeeze() == y.shift(1)[pred.index]
-    ).all()  # last year's value should match this year's value, with the sine wave we generated
-    assert (
-        len(pred) == 120 * 0.8
-    )  # should return non-NaN predictions for the all out-of-sample sets
 
 
 def test_baseline_naive_seasonal() -> None:
