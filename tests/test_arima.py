@@ -11,14 +11,16 @@ from fold_models.high_arima import ARIMA
 
 def test_arima_equivalent() -> None:
     _, y = generate_sine_wave_data(length=70, freq="s")
-    splitter = ExpandingWindowSplitter(initial_train_window=40, step=1)
+    splitter = ExpandingWindowSplitter(initial_train_window=50, step=1)
 
     model = ARIMA(1, 1, 0)
     pred_own_ar, _ = train_backtest(model, None, y, splitter)
 
     model = WrapStatsModels(
-        StatsModelARIMA, init_args={"order": (1, 1, 0), "trend": "n"}, online_mode=True
+        StatsModelARIMA, init_args={"order": (1, 1, 0), "trend": "n"}, online_mode=False
     )
+    model = WrapStatsForecast.from_model(StatsForecastARIMA((1, 1, 0)), online_mode=False)
+
     pred_statsforecast_ar, _ = train_backtest(model, None, y, splitter)
     assert np.isclose(
         pred_statsforecast_ar.squeeze(), pred_own_ar.squeeze(), atol=0.02

@@ -4,12 +4,12 @@ from fold.splitters import ExpandingWindowSplitter
 from fold.utils.tests import generate_monotonous_data, generate_sine_wave_data
 from fold_wrappers import WrapStatsForecast, WrapStatsModels
 from statsforecast.models import ARIMA as StatsForecastARIMA
-from statsmodels.tsa.arima.model import ARIMA as StatsModelARIMA
+from statsmodels.tsa.ar_model import AutoReg as StatsModelAR
 
 from fold_models.ar import AR
 
 
-def test_ar_equivalent() -> None:
+def test_ar_1_equivalent() -> None:
     _, y = generate_monotonous_data(length=70, freq="s")
     splitter = ExpandingWindowSplitter(initial_train_window=40, step=1)
 
@@ -17,7 +17,33 @@ def test_ar_equivalent() -> None:
     pred_own_ar, _ = train_backtest(model, None, y, splitter)
 
     model = WrapStatsModels(
-        StatsModelARIMA, init_args={"order": (1, 0, 0), "trend": "n"}, online_mode=True
+        StatsModelAR,
+        init_args={
+            "lags": [1],
+            "trend": "n",
+        },
+        online_mode=True,
+    )
+    pred_statsforecast_ar, _ = train_backtest(model, None, y, splitter)
+    assert np.isclose(
+        pred_statsforecast_ar.squeeze(), pred_own_ar.squeeze(), atol=0.02
+    ).all()
+
+
+def test_ar_2_equivalent() -> None:
+    _, y = generate_monotonous_data(length=70, freq="s")
+    splitter = ExpandingWindowSplitter(initial_train_window=40, step=1)
+
+    model = AR(2)
+    pred_own_ar, _ = train_backtest(model, None, y, splitter)
+
+    model = WrapStatsModels(
+        StatsModelAR,
+        init_args={
+            "lags": [2],
+            "trend": "n",
+        },
+        online_mode=True,
     )
     pred_statsforecast_ar, _ = train_backtest(model, None, y, splitter)
     assert np.isclose(
