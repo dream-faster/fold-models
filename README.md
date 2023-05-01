@@ -11,9 +11,9 @@
   <a href="https://dream-faster.github.io/fold/">
     <img src="https://raw.githubusercontent.com/dream-faster/fold-models/main/docs/images/logo.svg" alt="Logo" width="90" >
   </a>
-<h3 align="center"><b>FOLD-MODELS</b><br> <i>(/fold models/)</i></h3>
+<h3 align="center"><b>FOLD-MODELS</b></h3>
   <p align="center">
-    <b>Time Series Models.
+    <b>Extremely Fast Time Series Models.
     <br/>To be used with  <a href='https://github.com/dream-faster/fold'>Fold.</a> </b><br>
     <br/>
     <a href="https://dream-faster.github.io/fold-models/"><strong>Explore the docs »</strong></a>
@@ -28,6 +28,8 @@ Name          | Usage
 Naive         | `from fold_models import Naive`
 NaiveSeasonal | `from fold_models import NaiveSeasonal`
 MovingAverage | `from fold_models import MovingAverage`
+AR            | `from fold_models import AR`
+ARIMA         | `from fold_models import ARIMA`
 
 # Installation
 
