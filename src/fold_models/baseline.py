@@ -33,9 +33,9 @@ class NaiveSeasonal(TimeSeriesModel):
         )
 
     def predict_in_sample(
-        self, X: pd.DataFrame, lagged_y: pd.Series
+        self, X: pd.DataFrame, past_y: pd.Series
     ) -> Union[pd.Series, pd.DataFrame]:
-        return lagged_y.shift(self.seasonal_length - 1)
+        return past_y.shift(self.seasonal_length - 1)
 
     fit = fit_noop
     update = fit
@@ -64,9 +64,9 @@ class MovingAverage(TimeSeriesModel):
         return pd.Series(past_y[-self.window_size :].mean(), index=X.index[-1:None])
 
     def predict_in_sample(
-        self, X: pd.DataFrame, lagged_y: pd.Series
+        self, X: pd.DataFrame, past_y: pd.Series
     ) -> Union[pd.Series, pd.DataFrame]:
-        return lagged_y.rolling(self.window_size).mean()
+        return past_y.rolling(self.window_size).mean()
 
     fit = fit_noop
     update = fit
