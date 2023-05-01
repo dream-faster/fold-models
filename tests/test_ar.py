@@ -1,7 +1,7 @@
 import numpy as np
 from fold.loop import train_backtest
 from fold.splitters import ExpandingWindowSplitter
-from fold.utils.tests import generate_monotonous_data, generate_sine_wave_data
+from fold.utils.tests import generate_monotonous_data
 from fold_wrappers import WrapStatsForecast, WrapStatsModels
 from statsforecast.models import ARIMA as StatsForecastARIMA
 from statsmodels.tsa.ar_model import AutoReg as StatsModelAR
