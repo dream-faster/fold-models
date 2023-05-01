@@ -92,4 +92,4 @@ def _predict(models, past_y: pd.Series, indices) -> pd.Series:
         )
         for index, lr in enumerate(models, start=1)
     ]
-    return pd.Series(np.vstack(preds).sum(axis=0), index=indices)
+    return pd.Series(np.vstack(preds).mean(axis=0), index=indices)
