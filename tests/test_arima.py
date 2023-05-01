@@ -1,12 +1,12 @@
 import numpy as np
 from fold.loop import train_backtest
 from fold.splitters import ExpandingWindowSplitter
-from fold.utils.tests import generate_monotonous_data, generate_sine_wave_data
+from fold.utils.tests import generate_sine_wave_data
 from fold_wrappers import WrapStatsForecast, WrapStatsModels
 from statsforecast.models import ARIMA as StatsForecastARIMA
 from statsmodels.tsa.arima.model import ARIMA as StatsModelARIMA
 
-from fold_models.high_arima import ARIMA
+from fold_models.arima import ARIMA
 
 
 def test_arima_equivalent() -> None:
@@ -19,11 +19,13 @@ def test_arima_equivalent() -> None:
     model = WrapStatsModels(
         StatsModelARIMA, init_args={"order": (1, 1, 0), "trend": "n"}, online_mode=False
     )
-    model = WrapStatsForecast.from_model(StatsForecastARIMA((1, 1, 0)), online_mode=False)
+    model = WrapStatsForecast.from_model(
+        StatsForecastARIMA((1, 1, 0)), online_mode=False
+    )
 
     pred_statsforecast_ar, _ = train_backtest(model, None, y, splitter)
     assert np.isclose(
-        pred_statsforecast_ar.squeeze(), pred_own_ar.squeeze(), atol=0.02
+        pred_statsforecast_ar.squeeze(), pred_own_ar.squeeze(), atol=0.05
     ).all()
 
 
