@@ -1,12 +1,12 @@
 from typing import Union
 
 import pandas as pd
-from fold.base import fit_noop
+from fold.base import Tunable, fit_noop
 from fold.models.base import TimeSeriesModel
 from fold.models.baseline import Naive  # noqa
 
 
-class NaiveSeasonal(TimeSeriesModel):
+class NaiveSeasonal(TimeSeriesModel, Tunable):
     """
     A model that predicts the last value seen in the same season.
     """
@@ -40,8 +40,22 @@ class NaiveSeasonal(TimeSeriesModel):
     fit = fit_noop
     update = fit
 
+    def get_params(self) -> dict:
+        return {"seasonal_length": self.seasonal_length}
 
-class MovingAverage(TimeSeriesModel):
+    def set_params(self, **parameters) -> None:
+        for parameter, value in parameters.items():
+            setattr(self, parameter, value)
+
+        self.properties = TimeSeriesModel.Properties(
+            requires_X=False,
+            mode=TimeSeriesModel.Properties.Mode.online,
+            memory_size=self.seasonal_length,
+            _internal_supports_minibatch_backtesting=True,
+        )
+
+
+class MovingAverage(TimeSeriesModel, Tunable):
     """
     A model that predicts the mean of the last values seen.
     """
@@ -73,8 +87,22 @@ class MovingAverage(TimeSeriesModel):
     fit = fit_noop
     update = fit
 
+    def get_params(self) -> dict:
+        return {"window_size": self.window_size}
 
-class ExponentiallyWeightedMovingAverage(TimeSeriesModel):
+    def set_params(self, **parameters) -> None:
+        for parameter, value in parameters.items():
+            setattr(self, parameter, value)
+
+        self.properties = TimeSeriesModel.Properties(
+            requires_X=False,
+            mode=TimeSeriesModel.Properties.Mode.online,
+            memory_size=self.window_size,
+            _internal_supports_minibatch_backtesting=True,
+        )
+
+
+class ExponentiallyWeightedMovingAverage(TimeSeriesModel, Tunable):
     """
     A model that predicts the exponentially weighed mean of the last values seen.
     """
@@ -86,7 +114,7 @@ class ExponentiallyWeightedMovingAverage(TimeSeriesModel):
         self.properties = TimeSeriesModel.Properties(
             requires_X=False,
             mode=TimeSeriesModel.Properties.Mode.online,
-            memory_size=window_size * 4,
+            memory_size=self.window_size * 4,
             _internal_supports_minibatch_backtesting=True,
         )
 
@@ -106,3 +134,17 @@ class ExponentiallyWeightedMovingAverage(TimeSeriesModel):
 
     fit = fit_noop
     update = fit
+
+    def get_params(self) -> dict:
+        return {"window_size": self.window_size}
+
+    def set_params(self, **parameters) -> None:
+        for parameter, value in parameters.items():
+            setattr(self, parameter, value)
+
+        self.properties = TimeSeriesModel.Properties(
+            requires_X=False,
+            mode=TimeSeriesModel.Properties.Mode.online,
+            memory_size=self.window_size * 4,
+            _internal_supports_minibatch_backtesting=True,
+        )
