@@ -3,7 +3,7 @@ import pytest
 from fold.loop import train_backtest
 from fold.splitters import ExpandingWindowSplitter
 from fold.transformations.dev import Test
-from fold.utils.tests import generate_sine_wave_data
+from fold.utils.tests import generate_sine_wave_data, tuneability_test
 
 from fold_models.baseline import (
     ExponentiallyWeightedMovingAverage,
@@ -35,6 +35,7 @@ def test_baseline_naive_seasonal(online: bool) -> None:
     assert (
         len(pred) == 120 * 0.8
     )  # should return non-NaN predictions for the all out-of-sample sets
+    tuneability_test(naive_seasonal, dict(seasonal_length=5))
 
 
 @pytest.mark.parametrize("online", [True, False])
@@ -50,6 +51,12 @@ def test_baseline_mean(online: bool) -> None:
     assert (
         len(pred) == 400 * 0.8
     )  # should return non-NaN predictions for the all out-of-sample sets
+
+    tuneability_test(
+        ma,
+        dict(window_size=5),
+        tolerance=0.0001,
+    )
 
 
 @pytest.mark.parametrize("online", [True, False])
@@ -67,3 +74,9 @@ def test_baseline_ewmean(online: bool) -> None:
     assert (
         len(pred) == 400 * 0.8
     )  # should return non-NaN predictions for the all out-of-sample sets
+
+    tuneability_test(
+        ma,
+        dict(window_size=5),
+        tolerance=0.05,
+    )

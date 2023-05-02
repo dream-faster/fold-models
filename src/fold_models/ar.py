@@ -2,11 +2,12 @@ from typing import Optional, Union
 
 import numpy as np
 import pandas as pd
+from fold.base import Tunable
 from fold.models.base import TimeSeriesModel
 from sklearn.linear_model import LinearRegression, SGDRegressor
 
 
-class AR(TimeSeriesModel):
+class AR(TimeSeriesModel, Tunable):
     def __init__(self, p: int) -> None:
         self.p = p
         self.name = f"AR-{str(p)}"
@@ -80,6 +81,22 @@ class AR(TimeSeriesModel):
         return _predict(self.models, past_y, indices=X.index)
 
     predict_in_sample = predict
+
+    def get_params(self) -> dict:
+        return {"p": self.p}
+
+    def set_params(self, **parameters) -> None:
+        for parameter, value in parameters.items():
+            setattr(self, parameter, value)
+        self.name = f"AR-{str(self.p)}"
+        self.properties = TimeSeriesModel.Properties(
+            requires_X=False,
+            mode=TimeSeriesModel.Properties.Mode.online,
+            model_type=TimeSeriesModel.Properties.ModelType.regressor,
+            memory_size=self.p,
+            _internal_supports_minibatch_backtesting=True,
+        )
+        self.models = [LinearRegression() for _ in range(self.p)]
 
 
 def _predict(models, past_y: pd.Series, indices) -> pd.Series:
