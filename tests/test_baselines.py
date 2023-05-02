@@ -60,7 +60,9 @@ def test_baseline_ewmean(online: bool) -> None:
     ma.properties._internal_supports_minibatch_backtesting = not online
     pred, _ = train_backtest([ma, test_assert], X, y, splitter)
     assert np.isclose(
-        y.shift(1).ewm(12).mean()[pred.index], pred.squeeze(), atol=0.01
+        y.shift(1).ewm(alpha=1 / 12, adjust=True).mean()[pred.index],
+        pred.squeeze(),
+        atol=0.01,
     ).all()
     assert (
         len(pred) == 400 * 0.8

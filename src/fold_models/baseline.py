@@ -86,7 +86,7 @@ class ExponentiallyWeightedMovingAverage(TimeSeriesModel):
         self.properties = TimeSeriesModel.Properties(
             requires_X=False,
             mode=TimeSeriesModel.Properties.Mode.online,
-            memory_size=window_size,
+            memory_size=window_size * 4,
             _internal_supports_minibatch_backtesting=True,
         )
 
@@ -95,14 +95,14 @@ class ExponentiallyWeightedMovingAverage(TimeSeriesModel):
     ) -> Union[pd.Series, pd.DataFrame]:
         # it's an online transformation, so len(X) will be always 1,
         return pd.Series(
-            past_y.ewm(self.window_size).mean()[-1],
+            past_y.ewm(alpha=1 / self.window_size, adjust=True).mean()[-1],
             index=X.index[-1:None],
         )
 
     def predict_in_sample(
         self, X: pd.DataFrame, past_y: pd.Series
     ) -> Union[pd.Series, pd.DataFrame]:
-        return past_y.ewm(self.window_size).mean()
+        return past_y.ewm(alpha=1 / self.window_size, adjust=True).mean()
 
     fit = fit_noop
     update = fit
