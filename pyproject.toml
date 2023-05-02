@@ -47,6 +47,9 @@ quality = [
 tests = [
   "pytest~=7.1.2",
   "fold-core~=0.1",
+  "fold-wrappers~=0.1",
+  "statsforecast",
+  "statsmodels",
 ]
 docs = [
   "mkdocs-material",
