@@ -43,17 +43,6 @@ class NaiveSeasonal(TimeSeriesModel, Tunable):
     def get_params(self) -> dict:
         return {"seasonal_length": self.seasonal_length}
 
-    def set_params(self, **parameters) -> None:
-        for parameter, value in parameters.items():
-            setattr(self, parameter, value)
-
-        self.properties = TimeSeriesModel.Properties(
-            requires_X=False,
-            mode=TimeSeriesModel.Properties.Mode.online,
-            memory_size=self.seasonal_length,
-            _internal_supports_minibatch_backtesting=True,
-        )
-
 
 class MovingAverage(TimeSeriesModel, Tunable):
     """
@@ -89,17 +78,6 @@ class MovingAverage(TimeSeriesModel, Tunable):
 
     def get_params(self) -> dict:
         return {"window_size": self.window_size}
-
-    def set_params(self, **parameters) -> None:
-        for parameter, value in parameters.items():
-            setattr(self, parameter, value)
-
-        self.properties = TimeSeriesModel.Properties(
-            requires_X=False,
-            mode=TimeSeriesModel.Properties.Mode.online,
-            memory_size=self.window_size,
-            _internal_supports_minibatch_backtesting=True,
-        )
 
 
 class ExponentiallyWeightedMovingAverage(TimeSeriesModel, Tunable):
@@ -137,14 +115,3 @@ class ExponentiallyWeightedMovingAverage(TimeSeriesModel, Tunable):
 
     def get_params(self) -> dict:
         return {"window_size": self.window_size}
-
-    def set_params(self, **parameters) -> None:
-        for parameter, value in parameters.items():
-            setattr(self, parameter, value)
-
-        self.properties = TimeSeriesModel.Properties(
-            requires_X=False,
-            mode=TimeSeriesModel.Properties.Mode.online,
-            memory_size=self.window_size * 4,
-            _internal_supports_minibatch_backtesting=True,
-        )
