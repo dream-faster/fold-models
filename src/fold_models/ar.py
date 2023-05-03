@@ -85,19 +85,6 @@ class AR(TimeSeriesModel, Tunable):
     def get_params(self) -> dict:
         return {"p": self.p}
 
-    def set_params(self, **parameters) -> None:
-        for parameter, value in parameters.items():
-            setattr(self, parameter, value)
-        self.name = f"AR-{str(self.p)}"
-        self.properties = TimeSeriesModel.Properties(
-            requires_X=False,
-            mode=TimeSeriesModel.Properties.Mode.online,
-            model_type=TimeSeriesModel.Properties.ModelType.regressor,
-            memory_size=self.p,
-            _internal_supports_minibatch_backtesting=True,
-        )
-        self.models = [LinearRegression() for _ in range(self.p)]
-
 
 def _predict(models, past_y: pd.Series, indices) -> pd.Series:
     preds = [
