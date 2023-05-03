@@ -20,7 +20,6 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install ".[tests]"
-          pip uninstall fold-core
           pip install https://github.com/dream-faster/fold/archive/main.zip
       - name: run-tests
         run: pytest tests/test_ar.py -s --durations 0
