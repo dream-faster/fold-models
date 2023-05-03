@@ -46,7 +46,7 @@ quality = [
 ]
 tests = [
   "pytest~=7.1.2",
-  "fold-core @ https://github.com/dream-faster/fold/archive/main.zip",
+  "fold-core~=0.1",
   "fold-wrappers~=0.1",
   "statsforecast",
   "statsmodels",
