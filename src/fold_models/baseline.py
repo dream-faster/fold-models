@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Optional, Union
 
 import pandas as pd
 from fold.base import Tunable, fit_noop
@@ -13,7 +13,9 @@ class NaiveSeasonal(TimeSeriesModel, Tunable):
 
     name = "NaiveSeasonal"
 
-    def __init__(self, seasonal_length: int) -> None:
+    def __init__(
+        self, seasonal_length: int, params_to_try: Optional[dict] = None
+    ) -> None:
         assert seasonal_length > 1, "seasonal_length must be greater than 1"
         self.seasonal_length = seasonal_length
         self.properties = TimeSeriesModel.Properties(
@@ -22,6 +24,7 @@ class NaiveSeasonal(TimeSeriesModel, Tunable):
             memory_size=seasonal_length,
             _internal_supports_minibatch_backtesting=True,
         )
+        self.params_to_try = params_to_try
 
     def predict(
         self, X: pd.DataFrame, past_y: pd.Series
@@ -51,7 +54,7 @@ class MovingAverage(TimeSeriesModel, Tunable):
 
     name = "MovingAverage"
 
-    def __init__(self, window_size: int) -> None:
+    def __init__(self, window_size: int, params_to_try: Optional[dict] = None) -> None:
         self.window_size = window_size
         self.properties = TimeSeriesModel.Properties(
             requires_X=False,
@@ -59,6 +62,7 @@ class MovingAverage(TimeSeriesModel, Tunable):
             memory_size=window_size,
             _internal_supports_minibatch_backtesting=True,
         )
+        self.params_to_try = params_to_try
 
     def predict(
         self, X: pd.DataFrame, past_y: pd.Series
@@ -87,7 +91,7 @@ class ExponentiallyWeightedMovingAverage(TimeSeriesModel, Tunable):
 
     name = "ExponentiallyWeightedMovingAverage"
 
-    def __init__(self, window_size: int) -> None:
+    def __init__(self, window_size: int, params_to_try: Optional[dict] = None) -> None:
         self.window_size = window_size
         self.properties = TimeSeriesModel.Properties(
             requires_X=False,
@@ -95,6 +99,7 @@ class ExponentiallyWeightedMovingAverage(TimeSeriesModel, Tunable):
             memory_size=self.window_size * 4,
             _internal_supports_minibatch_backtesting=True,
         )
+        self.params_to_try = params_to_try
 
     def predict(
         self, X: pd.DataFrame, past_y: pd.Series

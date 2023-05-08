@@ -8,7 +8,7 @@ from sklearn.linear_model import LinearRegression, SGDRegressor
 
 
 class AR(TimeSeriesModel, Tunable):
-    def __init__(self, p: int) -> None:
+    def __init__(self, p: int, params_to_try: Optional[dict] = None) -> None:
         self.p = p
         self.name = f"AR-{str(p)}"
         self.properties = TimeSeriesModel.Properties(
@@ -19,6 +19,7 @@ class AR(TimeSeriesModel, Tunable):
             _internal_supports_minibatch_backtesting=True,
         )
         self.models = [LinearRegression() for _ in range(p)]
+        self.params_to_try = params_to_try
 
     def fit(
         self,
